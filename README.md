@@ -1,35 +1,35 @@
 # Monorepo Template
 
-Plantilla monorepo lista para arrancar proyectos B2B (backend + frontend) sin repetir configuración.
+A ready-to-use monorepo template for starting B2B projects (backend + frontend) without repeating setup.
 
 ## Stack
 
 - **Monorepo**: pnpm workspace (`pnpm@10.32.1`)
 - **Backend**: NestJS 11, Prisma 7, PostgreSQL, Passport JWT, Swagger
 - **Frontend**: React 19, Vite 8, TanStack Router, TanStack Query, Tailwind CSS 4, shadcn/ui
-- **Auth**: JWT en cookie HttpOnly + roles (`ADMIN`, `USER`)
+- **Auth**: JWT in an HttpOnly cookie + roles (`ADMIN`, `USER`)
 
-## Estructura
+## Structure
 
 ```
 monorepo-template/
 ├── apps/
-│   ├── backend/            # API REST (NestJS + Prisma) — módulo de autenticación
+│   ├── backend/            # REST API (NestJS + Prisma) — authentication module
 │   └── frontend/           # SPA (Vite + React + TanStack Router)
 ├── package.json
 └── pnpm-workspace.yaml
 ```
 
-## Desarrollo
+## Development
 
 ```bash
-pnpm install                              # instalar dependencias
+pnpm install                              # install dependencies
 
 # Backend
-cp apps/backend/.env.example apps/backend/.env   # ajusta JWT_SECRET
-cd apps/backend && docker compose up -d          # Postgres en :15432
+cp apps/backend/.env.example apps/backend/.env   # set JWT_SECRET
+cd apps/backend && docker compose up -d          # Postgres on :15432
 pnpm --filter backend prisma:migrate dev --name init
-pnpm --filter backend prisma:seed                # crea admin@example.com / admin123
+pnpm --filter backend prisma:seed                # creates admin@example.com / admin123
 pnpm --filter backend start:dev                  # http://localhost:4000
 
 # Frontend
@@ -37,94 +37,94 @@ cp apps/frontend/.env.example apps/frontend/.env
 pnpm --filter frontend dev                       # http://localhost:5173
 ```
 
-## Autenticación (backend)
+## Authentication (backend)
 
-Endpoints bajo `/api/v1/auth`:
+Endpoints under `/api/v1/auth`:
 
-| Método | Ruta | Descripción |
+| Method | Route | Description |
 |---|---|---|
-| POST | `/auth/create-account` | Registrar usuario |
-| POST | `/auth/confirm-account` | Confirmar cuenta con token |
-| POST | `/auth/login` | Iniciar sesión (setea cookie HttpOnly) |
-| POST | `/auth/logout` | Cerrar sesión |
-| POST | `/auth/forgot-password` | Solicitar reset de contraseña |
-| POST | `/auth/validate-token` | Validar token de reset |
-| POST | `/auth/reset-password` | Restablecer contraseña |
-| GET | `/auth/user` | Usuario actual (protegido) |
-| PATCH | `/auth/user` | Actualizar perfil (protegido) |
+| POST | `/auth/create-account` | Register a user |
+| POST | `/auth/confirm-account` | Confirm account with token |
+| POST | `/auth/login` | Log in (sets an HttpOnly cookie) |
+| POST | `/auth/logout` | Log out |
+| POST | `/auth/forgot-password` | Request password reset |
+| POST | `/auth/validate-token` | Validate reset token |
+| POST | `/auth/reset-password` | Reset password |
+| GET | `/auth/user` | Current user (protected) |
+| PATCH | `/auth/user` | Update profile (protected) |
 
-> `EmailsService` es un stub que imprime el token en los logs del backend. Para producción, reemplázalo por Resend/nodemailer/SES.
+> `EmailsService` is a stub that prints the token to the backend logs. For production, replace it with Resend/nodemailer/SES.
 
-## Estructura recomendada del frontend
+## Recommended frontend structure
 
 ```
 apps/frontend/src/
-├── main.tsx                    # entrada: router + providers
-├── index.css                   # Tailwind 4 + variables de tema (shadcn)
+├── main.tsx                    # entry point: router + providers
+├── index.css                   # Tailwind 4 + theme variables (shadcn)
 │
 ├── routes/                     # file-based routing (TanStack Router)
-│   ├── __root.tsx              # layout raíz
+│   ├── __root.tsx              # root layout
 │   ├── index.tsx               # "/"
 │   ├── login.tsx               # "/login"
-│   └── _protected/             # rutas que requieren sesión (layout + páginas)
-│       ├── _protected.tsx      # guard de auth + shell (sidebar/topbar)
+│   └── _protected/             # routes that require a session (layout + pages)
+│       ├── _protected.tsx      # auth guard + shell (sidebar/topbar)
 │       └── dashboard.tsx
 │
-├── features/                   # lógica de negocio por dominio (columna vertebral)
+├── features/                   # business logic per domain (backbone)
 │   └── <feature>/
-│       ├── components/         # UI presentacional y orquestación
-│       ├── hooks/              # estado, mutaciones, side effects (react-hook-form, useQuery)
-│       ├── lib/                # helpers puros, columnas, formatters, constantes
-│       └── pages/              # páginas delgadas (orquestan components + hooks)
+│       ├── components/         # presentational and orchestration UI
+│       ├── hooks/              # state, mutations, side effects (react-hook-form, useQuery)
+│       ├── lib/                # pure helpers, column builders, formatters, constants
+│       └── pages/              # thin pages (orchestrate components + hooks)
 │
-├── services/                   # API types + fetch + hooks de React Query
-│   ├── api.ts                  # instancia axios + helpers de error
+├── services/                   # API types + fetch + React Query hooks
+│   ├── api.ts                  # axios instance + error helpers
 │   └── <feature>/
 │       └── <feature>.service.ts
 │
-├── schema/                     # esquemas Zod (validación compartida)
+├── schema/                     # Zod schemas (shared validation)
 │   ├── auth.ts
-│   └── index.ts                # re-export
+│   └── index.ts                # re-exports
 │
-├── components/                 # componentes compartidos entre features
-│   ├── ui/                     # shadcn/ui (generados con `npx shadcn add`)
+├── components/                 # components shared across features
+│   ├── ui/                     # shadcn/ui (generated via `npx shadcn add`)
 │   ├── layout/                 # sidebar, topbar, shell
-│   └── shared/                 # componentes reutilizables
+│   └── shared/                 # reusable components
 │
-├── hooks/                      # hooks globales (tema, media queries, etc.)
-├── lib/                        # utilidades puras (cn, format, etc.)
-├── providers/                  # contextos/providers de la app (QueryClient, auth)
-└── assets/                     # imágenes, fuentes, íconos
+├── hooks/                      # global hooks (theme, media queries, etc.)
+├── lib/                        # pure utilities (cn, format, etc.)
+├── providers/                  # app contexts/providers (QueryClient, auth)
+└── assets/                     # images, fonts, icons
 ```
 
-### Reglas de oro
+### Golden rules
 
-1. **`routes/` delgadas**: una ruta solo importa una página de `features/` y la renderiza. Nada de lógica.
-2. **`features/<dominio>/`** agrupa todo lo de un dominio: `components/`, `hooks/`, `lib/`, `pages/`.
-3. **`services/`** es la única capa que habla con el backend (axios + React Query). Los componentes nunca hacen `fetch` directo.
-4. **`schema/`** centraliza los esquemas Zod; formularios usan `zodResolver` + `react-hook-form`.
-5. **shadcn/ui** vive en `components/ui/`; se agrega con `npx shadcn@latest add <componente>`.
-6. Un hook por preocupación (`use-<entidad>-table.ts`, `use-<entidad>-form.ts`); si un componente acumula estado + query + mutación, muévelo a `hooks/`.
+1. **Keep `routes/` thin**: a route only imports a page from `features/` and renders it. No logic.
+2. **`features/<domain>/`** groups everything for a domain: `components/`, `hooks/`, `lib/`, `pages/`.
+3. **`services/`** is the only layer that talks to the backend (axios + React Query). Components never `fetch` directly.
+4. **`schema/`** centralizes Zod schemas; forms use `zodResolver` + `react-hook-form`.
+5. **shadcn/ui** lives in `components/ui/`; add components with `npx shadcn@latest add <component>`.
+6. One hook per concern (`use-<entity>-table.ts`, `use-<entity>-form.ts`); if a component accumulates state + query + mutation, move it to `hooks/`.
 
-### Agregar shadcn/ui
+### Add shadcn/ui
 
 ```bash
 npx shadcn@latest add button card input label sonner
 ```
 
-### Agregar un feature nuevo
+### Add a new feature
 
 ```bash
-# 1. Esquema de validación
+# 1. Validation schema
 touch src/schema/<feature>.ts
 
-# 2. Servicio (types + hooks de React Query)
+# 2. Service (types + React Query hooks)
 mkdir -p src/services/<feature>
 
 # 3. Feature (components/hooks/lib/pages)
 mkdir -p src/features/<feature>/{components,hooks,lib,pages}
 
-# 4. Ruta
+# 4. Route
 touch src/routes/_protected/<feature>.tsx
 ```
 
