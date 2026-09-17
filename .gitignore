@@ -1,0 +1,21 @@
+node_modules
+.pnpm-store
+csv
+.env
+.env.*
+!.env.example
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+*.tfplan
+crash.log
+crash.*.log
+.terraformrc
+terraform.rc
+
+
+
