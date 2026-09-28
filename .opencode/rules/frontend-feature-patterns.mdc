@@ -1,0 +1,54 @@
+---
+description: Antes de implementar features frontend, revisar FRONTEND_MODULES, estructura del módulo, Zod/hooks y skills del repo.
+alwaysApply: true
+---
+
+# Patrones de feature frontend
+
+Antes de crear o modificar UI en `apps/frontend`, sigue este checklist. No inventes un patrón si ya existe uno equivalente.
+
+## 1. Leer la guía del módulo
+
+1. `docs/frontend/FRONTEND_MODULES.md` — estructura `features/<module>/{components,hooks,lib}`, servicios en `src/services/`, schemas en `src/schema/`, rutas delgadas.
+2. El feature hermano más cercano (p. ej. `customers`, `services`, `opportunities`) como referencia de hooks y diálogos.
+3. Skills relevantes en `.agents/skills/` cuando apliquen: `zod`, `react-hook-form`, `tanstack-query`, `composition-patterns`, `react-best-practices`, `shadcn`, `tailwind-css-patterns`.
+
+## 2. Estructura obligatoria
+
+```txt
+features/<module>/
+├── components/   # UI presentacional / orquestación ligera
+├── hooks/        # estado, mutaciones, side effects, coordinación de datos
+└── lib/          # helpers puros, constantes, columnas, formatters
+```
+
+- Páginas y diálogos deben ser delgados: extrae lógica a `hooks/`.
+- Helpers reutilizables (formato, maps, options) van en `lib/`, no embebidos en el JSX.
+- API types + fetch + React Query hooks viven en `src/services/<module>/`.
+
+## 3. Validación con Zod
+
+- Schemas en `apps/frontend/src/schema/<module>.ts` y reexport en `src/schema/index.ts`.
+- Formularios: `zodResolver` + React Hook Form (`useForm`, `defaultValues`, modo `onSubmit`).
+- Selecciones / payloads no-RHF: `safeParse` en el límite (submit o mutationFn) con mensajes en español.
+- Exporta schema + `z.infer` (tipos). No dupliques tipos a mano.
+
+```ts
+// ❌ BAD — mutar sin validar
+await replaceLines(rawSelection)
+
+// ✅ GOOD
+const parsed = ReplaceOpportunityLinesSchema.safeParse(payload)
+if (!parsed.success) { toast.error(...); return }
+await replaceLines(parsed.data)
+```
+
+## 4. Custom hooks
+
+- Si un componente acumula estado + query + mutation + handlers, muévelo a `use-<entity>-*.ts`.
+- El componente solo renderiza props/valores del hook.
+- Un hook por preocupación (tabla, form, líneas, diálogo de alta).
+
+## 5. Skills
+
+Al tocar formularios, schemas, tablas o composición, **lee y aplica** la skill correspondiente antes de escribir código. No ignores Zod/RHF porque el UI sea un diálogo custom: valida el payload igual.

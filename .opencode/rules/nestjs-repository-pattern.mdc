@@ -1,0 +1,109 @@
+---
+description: "Al crear un módulo NestJS, seguir el Repository Pattern con Prisma"
+globs: "apps/backend/src/**/*"
+---
+
+# NestJS Repository Pattern con Prisma
+
+Todo módulo de feature debe separar la capa de datos (Prisma) de la lógica de negocio usando el Repository Pattern.
+
+## Estructura esperada de un módulo
+
+```
+src/<feature>/
+├── <feature>.module.ts          # Importa PrismaModule, declara Service + Repository como providers
+├── <feature>.controller.ts      # HTTP layer
+├── <feature>.service.ts         # Business logic (NO inyecta PrismaService)
+├── dto/
+│   ├── create-<feature>.dto.ts
+│   ├── update-<feature>.dto.ts
+│   └── <feature>-response.dto.ts
+├── repositories/                # un repository por modelo Prisma
+│   └── <feature>.repository.ts  # Queries Prisma (NO contiene lógica de negocio)
+└── types/
+    └── <feature>-<type>.type.ts
+```
+
+## Reglas
+
+1. **Repository** es la única clase que inyecta `PrismaService`.
+2. **Service** nunca inyecta `PrismaService`. Solo inyecta Repositories y otros Services.
+3. **Métodos del Repository** deben tener nombre de dominio (`findByIdOrThrow`, `findActiveByUser`), no nombres genéricos (`findUnique`, `findMany`).
+4. **Repository** no contiene: reglas de negocio, llamadas a APIs externas, notificaciones, ni autorización.
+5. **Module** debe importar `PrismaModule` y registrar el Repository en `providers`.
+6. **Response DTO** debe existir para respuestas públicas (`<feature>-response.dto.ts`) y usar `@Expose()` + `@ApiProperty` / `@ApiPropertyOptional` con `example` para documentar Swagger.
+7. **Controller** debe usar el Response DTO en `@ApiResponse({ type: XxxResponseDto })` y en el tipo de retorno del método.
+
+## Template de Repository
+
+```ts
+@Injectable()
+export class XxxRepository {
+  constructor(private readonly prisma: PrismaService) {}
+
+  // Métodos con nombre semántico
+  async findByIdOrThrow(id: string) {
+    const entity = await this.prisma.xxx.findUnique({
+      where: { id },
+      include: /* ... */,
+    });
+    if (!entity) throw new NotFoundException(`Xxx #${id} not found`);
+    return entity;
+  }
+
+  // Para transacciones, aceptar tx opcional
+  async create(data: Prisma.XxxCreateInput, tx?: Prisma.TransactionClient) {
+    const client = tx ?? this.prisma;
+    return client.xxx.create({ data, include: /* ... */ });
+  }
+}
+```
+
+## Template de Service
+
+```ts
+@Injectable()
+export class XxxService {
+  constructor(
+    private readonly repo: XxxRepository,
+    // otros services...
+  ) {}
+
+  async doSomething(dto: CreateXxxDto) {
+    const entity = await this.repo.create({ ... });
+    // lógica de negocio, otros servicios...
+    return entity;
+  }
+}
+```
+
+## Template de Response DTO
+
+```ts
+export class XxxResponseDto {
+  @ApiProperty({ description: 'Entity ID', example: '550e8400-e29b-41d4-a716-446655440000' })
+  @Expose()
+  id: string;
+
+  @ApiProperty({ description: 'Display name', example: 'Example name' })
+  @Expose()
+  name: string;
+}
+```
+
+Para relaciones anidadas, crear DTOs específicos y usar `@Type(() => NestedResponseDto)` junto a `@Expose()`.
+
+## Template de Module
+
+```ts
+@Module({
+  imports: [PrismaModule, /* otros módulos */],
+  controllers: [XxxController],
+  providers: [XxxService, XxxRepository],
+})
+export class XxxModule {}
+```
+
+## Referencia
+
+Ver `docs/ARCHITECTURE.md` para documentación completa del patrón.

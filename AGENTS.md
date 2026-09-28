@@ -1,27 +1,28 @@
 # AGENTS.md
 
 ## Before any task
-CRITICAL: Read `docs/CONTEXT_APP` at the start of every conversation before taking any action.
-This file contains the project requirements, specifications, Figma prototypes, and evaluation criteria.
+CRITICAL: Read `docs/PRD.md` at the start of every conversation before taking any action.
+This is the Product Requirements Document; it contains the project summary, objectives, scope, requirements, and specifications.
 
 ## Documentation Rule
 - When changing database schema, Prisma models, migrations, catalogs, business logic, roles/permissions, integrations, or creating complete modules, update the related Markdown documentation in the same task.
-- Use `docs/backend/DATABASE_MIGRATION_PROPOSAL.md` for database, migration, catalog, payment, sales order, and financial logic changes.
-- Use `docs/CONTEXT_APP.md` for MVP scope, product phases, business context, and process changes.
-- Use the closest existing document under `docs/` for auth, notifications, Odoo, architecture, or module-specific behavior.
+- Use `docs/backend/` for database, migration, and backend module documentation.
+- Use `docs/PRD.md` for MVP scope, product phases, business context, and process changes.
+- Use the closest existing document under `docs/` for auth, notifications, integrations, architecture, or module-specific behavior.
 - If no existing document fits, create a focused Markdown file under `docs/` instead of leaving the decision only in code.
 
 ## Frontend/Backend Handoff Protocol
-- The frontend agent role is defined in `.cursor/rules/frontend-agent-role.mdc`: it only edits `apps/frontend/**` and `docs/frontend/**`, and never implements changes under `apps/backend/**`.
+- Frontend and backend are separate agents with distinct scopes: frontend edits `apps/frontend/**` and `docs/frontend/**`; backend edits `apps/backend/**`. See `.opencode/agents/`.
 - When a frontend task needs a backend change, the frontend agent documents it under `docs/frontend/backend-requests/` instead of writing backend code; check that folder for pending requests before starting backend work.
-- When a backend change ships that the frontend must consume, document it as `docs/frontend/<TOPIC>_HANDOFF.md` (see `docs/frontend/PROJECTS_SERVICE_RESPONSIBILITY_HANDOFF.md` for the expected structure) and update the matching request status in `docs/frontend/backend-requests/INDEX.md`.
+- When a backend change ships that the frontend must consume, document it as `docs/frontend/<TOPIC>_HANDOFF.md` and update the matching request status in `docs/frontend/backend-requests/INDEX.md`.
+- To hand off work to another agent at runtime, use the `/handoff` command. See `docs/AGENT_COORDINATION.md`.
 
 ## Repo Shape
 - pnpm workspace, package manager pinned as `pnpm@10.32.1` in root `package.json`.
 - Workspace packages are `apps/*` and `packages/**/*`; `packages/` is currently empty.
 - Frontend is `apps/frontend`: React 19 + Vite 8 entrypoint `src/main.tsx`, app component `src/App.tsx`.
 - Backend is `apps/backend`: NestJS 11 entrypoint `src/main.ts`, root module `src/app.module.ts`, listens on `process.env.PORT ?? 3000`.
-- Project OpenCode config is `opencode.json`; it enables the remote Prisma MCP server at `https://mcp.prisma.io/mcp` and may require Prisma Console auth on first use.
+- Project OpenCode config is `opencode.json`; it configures local MCP servers (shadcn, Figma) and the `herdrmesh` MCP for cross-agent handoffs. See `docs/AGENT_COORDINATION.md`.
 
 ## Backend Data Access Rule
 - When a feature module uses more than one Prisma model, create one repository per model so its ownership and queries remain explicit.

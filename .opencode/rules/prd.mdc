@@ -1,0 +1,17 @@
+---
+description: "Always read docs/PRD.md for product context and requirements"
+---
+
+# Project Context (PRD)
+
+CRITICAL: You MUST read the file `docs/PRD.md` at the start of every conversation (before taking any action). This is the Product Requirements Document and the single source of truth for what needs to be built.
+
+The PRD includes:
+- Product summary, context, and problem statement
+- General and specific objectives, and success metrics (KPIs)
+- Scope (in scope / out of scope / by phase)
+- Functional requirements (RF-###) and non-functional requirements
+- Business rules, high-level data model, architecture and stack
+- Integrations, design/UX references, constraints, risks, roadmap, and open questions
+
+Do not proceed with any task until you have read and understood `docs/PRD.md`.

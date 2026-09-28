@@ -1,0 +1,37 @@
+---
+description: "Frontend modules must separate pages, data grids, tables, forms, hooks, and module libs"
+patterns: "apps/frontend/src/features/**/*.tsx,apps/frontend/src/features/**/*.ts"
+---
+
+# Frontend Module Structure
+
+For any frontend module under `apps/frontend/src/features/<module>/`, keep page files small and compositional.
+
+Required module folders for non-trivial modules:
+
+- `components/`: visual components only.
+- `hooks/`: module-specific state, React Query coordination, form submit logic, URL side effects.
+- `lib/`: constants, formatters, column builders, local types, pure helpers.
+
+Page rule:
+
+- `<module>-page.tsx` must be an orchestrator only.
+- Do not put full DataGrid, DataTable, form implementation, column builders, mutation submit logic, or URL-query side effects directly in the page file.
+- If a page approaches ~200 lines, split it before adding more behavior.
+
+Table pattern:
+
+- `<module>-data-grid.tsx` composes filters, data table, mobile cards, pagination, and calls `use-<entity>-table`.
+- `<module>-data-table.tsx` renders only shadcn `Table` markup and TanStack Table rows/headers.
+- `<entity>-columns.tsx` defines `ColumnDef<T>[]` and `meta.sortable`.
+- `use-<entity>-table.ts` owns pagination, sorting, applied filters, `useReactTable`, and the list query.
+
+Form pattern:
+
+- `<entity>-form-card.tsx` renders the form UI.
+- `use-<entity>-form.ts` owns `react-hook-form`, `zodResolver`, mutation submission, loading state, and success/error toasts.
+- Use `Controller` for shadcn `Select`, date pickers, and other controlled components.
+
+Documentation:
+
+- When introducing or changing a module pattern, update `docs/FRONTEND_MODULES.md` in the same task.

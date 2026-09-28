@@ -1,0 +1,44 @@
+---
+description: "Document every NestJS controller endpoint with Swagger decorators so the API docs stay complete"
+patterns: "apps/backend/src/**/*.controller.ts,apps/backend/src/**/dto/*.ts"
+---
+
+# API documentation (Swagger)
+
+Every backend module, controller, and endpoint must keep Swagger documentation complete. The canonical guide is `docs/backend/API_DOCUMENTATION_GUIDE.md`; read it before creating or modifying controllers and response DTOs.
+
+## Required Workflow
+
+- Order the handlers in every controller by HTTP method: `@Get`/`@Sse` first, then `@Post`, `@Put`, `@Patch`, and `@Delete` last. Never mix the groups.
+- Inside each group, declare static routes (`/categories`, `/sales-catalog`) before dynamic ones (`/:id`).
+- Add `@ApiTags('<Area>')` at the controller level.
+- Add `@ApiOperation({ summary: '<short summary>' })` to every handler.
+- Add a success response on every handler:
+  - `@ApiResponse({ status, description, type })` with a response DTO class, or
+  - `@ApiPaginatedResponse(Model, 'description')` for paginated collections.
+- Add the relevant business errors the service actually throws: `400`, `401`, `403`, `404`, `409`.
+- Make the documented `status` match the handler's `@HttpCode`.
+- Add `@ApiResponse` with `description` (and a type when a DTO exists) for SSE endpoints.
+- For webhooks, document the acceptance status and the token/validation errors; use `@ApiExcludeEndpoint()` only with an explicit reason.
+- Verify Swagger still builds:
+
+```bash
+pnpm --filter backend build
+pnpm --filter backend test --runInBand
+pnpm --filter backend exec eslint "src/<module>/**/*.ts"
+```
+
+## Do Not Do This
+
+- Do not add a controller, route, or module with endpoints that lack `@ApiOperation` and a success `@ApiResponse`.
+- Do not document a success response without a `description`.
+- Do not use a bare array type for paginated endpoints; use `@ApiPaginatedResponse`.
+- Do not invent error codes the service does not throw.
+- Do not duplicate `@ApiResponse` for status 200 on top of `@ApiPaginatedResponse`.
+
+## Notes
+
+- `ApiPaginatedResponse` lives in `apps/backend/src/common/decorators/pagination.decorator.ts` and internally applies `@ApiOkResponse`.
+- Response DTOs belong in `<module>/dto/<entity>-response.dto.ts` and must be annotated with `@ApiProperty` / `@ApiPropertyOptional`.
+- If an endpoint has no response DTO yet, use `@ApiResponse({ status, description })` and track creating the DTO as technical debt.
+- If a documented contract changes, update the DTO, the endpoint, `docs/backend/API_DOCUMENTATION_GUIDE.md` when the pattern changes, and any frontend handoff under `docs/frontend/`.

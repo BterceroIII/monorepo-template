@@ -14,13 +14,21 @@
       "environment": {
         "FIGMA_API_KEY": "{env:FIGMA_API_KEY}"
       }
+    },
+    "herdrmesh": {
+      "type": "local",
+      "command": ["npx", "-y", "runchr-works/herdr-mesh"],
+      "enabled": true,
+      "timeout": 30000
     }
   },
+  "tools": {
+    "herdrmesh_*": false,
+    "herdrmesh_herdr_agent_list": true,
+    "herdrmesh_herdr_relay": true
+  },
   "instructions": [
-    ".opencode/rules/ponytail.mdc",
-    ".opencode/rules/shadcn-ui.mdc",
-    ".opencode/rules/context-app.mdc",
-    ".opencode/rules/prisma-best-practices.mdc"
+    ".opencode/rules/*.mdc"
   ],
   "skills": {
     "paths": [".agents/skills"]
@@ -28,7 +36,7 @@
   "references": {
     "docs": {
       "path": "docs",
-      "description": "Project documentation, requirements, and context files including CONTEXT_APP"
+      "description": "Project documentation, requirements, and context files including the PRD (docs/PRD.md)"
     }
   }
 }

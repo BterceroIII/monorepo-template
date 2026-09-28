@@ -1,0 +1,12 @@
+---
+description: "Run React Doctor after every repository change and block CI on diagnostics"
+patterns: "apps/frontend/**/*.{ts,tsx,js,jsx},apps/frontend/package.json,.github/workflows/*.yml"
+---
+
+# React Doctor Gate
+
+- After every change that can affect the frontend, run `pnpm --filter frontend run doctor:ci` from the repository root.
+- Treat every React Doctor warning or error as a blocking diagnostic. Do not suppress findings without reading the affected code and documenting why the finding is a false positive.
+- Fix the underlying issue before completing the task. Do not lower the gate, add ignores, or change the React Doctor configuration to hide a finding.
+- Run the focused frontend checks after React Doctor: `pnpm --filter frontend lint` and `pnpm --filter frontend build`.
+- GitHub Actions must run the same `doctor:ci` command before credentials, build, publish, deploy, or invalidation steps. A non-zero result must stop the job.

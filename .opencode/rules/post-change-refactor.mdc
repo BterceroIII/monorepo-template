@@ -1,0 +1,12 @@
+---
+description: Format changed code with Prettier after every implementation change
+alwaysApply: true
+---
+
+# Post-change Prettier formatting
+
+After implementing any code change, format every modified code or configuration file with Prettier before final verification.
+
+- Use the repository's configured Prettier command or `pnpm exec prettier --write <changed-files>`.
+- Do not claim completion until Prettier has run successfully on the changed files.
+- Then run the applicable lint, build, and quality gates.

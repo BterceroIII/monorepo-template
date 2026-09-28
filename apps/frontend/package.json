@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,css,md}\" \"index.html\" \"vite.config.ts\" \"eslint.config.js\"",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "doctor": "react-doctor",
+    "doctor:ci": "react-doctor --blocking warning --no-telemetry"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -36,6 +38,7 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
     "prettier": "^3.8.4",
+    "react-doctor": "^0.9.12",
     "tailwindcss": "^4.3.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
