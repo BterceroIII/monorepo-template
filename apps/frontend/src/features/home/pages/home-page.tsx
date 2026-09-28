@@ -6,9 +6,14 @@ export function HomePage() {
         <p className="text-muted-foreground">
           Punto de partida para tu proyecto B2B.
         </p>
-        <a href="/login" className="text-sm text-primary underline">
-          Ir al login
-        </a>
+        <div className="flex flex-col items-center gap-2">
+          <a href="/login" className="text-sm text-primary underline">
+            Ir al login
+          </a>
+          <a href="/likes" className="text-sm text-primary underline">
+            Ver publicaciones con likes
+          </a>
+        </div>
       </div>
     </main>
   );

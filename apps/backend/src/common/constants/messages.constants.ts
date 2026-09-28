@@ -13,3 +13,7 @@ export const AUTH_MESSAGES = {
   INCORRECT_PASSWORD: 'Contraseña incorrecta',
   GENERIC_ERROR: 'Ocurrió un error',
 } as const;
+
+export const POST_MESSAGES = {
+  NOT_FOUND: 'La publicación no existe',
+} as const;

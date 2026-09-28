@@ -24,8 +24,7 @@
   },
   "tools": {
     "herdrmesh_*": false,
-    "herdrmesh_herdr_agent_list": true,
-    "herdrmesh_herdr_relay": true
+    "herdrmesh_herdr_agent_list": true
   },
   "instructions": [
     ".opencode/rules/*.mdc"

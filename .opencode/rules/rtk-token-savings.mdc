@@ -1,0 +1,35 @@
+---
+description: "Route shell discovery through rtk and keep recursive searches out of node_modules so token savings hold"
+alwaysApply: true
+---
+
+# Ahorro de tokens con RTK
+
+RTK filtra la salida de los comandos antes de que entre al contexto. La métrica de ahorro es `(input - output) / input` sobre la salida cruda, así que **una sola búsqueda recursiva sin acotar sobre `node_modules` puede hundir el ahorro global aunque el resto del trabajo esté bien**.
+
+## Búsquedas recursivas
+
+- Nunca ejecutes `grep -r` / `rg` desde la raíz (`.`) sin acotar el `path` o excluir dependencias.
+- Acota siempre a directorios del proyecto: `apps/ docs/ packages/`, o un subpath concreto.
+- Si de verdad necesitas todo el repo, excluye dependencias explícitamente:
+  - `grep -rinE 'patrón' . --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist`
+  - `rg 'patrón' -g '!node_modules' -g '!dist'`
+- No busques dentro de `node_modules`, `dist/`, `build/` ni `.git/`. Si necesitas la API de una dependencia, lee su `.d.ts` o su doc con `rtk read`.
+- Para localizar archivos usa `glob`/`find`/`rtk find`, no grep recursivo.
+- Evita `-i` en búsquedas amplias: multiplica coincidencias en minificados y binarios.
+
+## Descubrimiento de estructura
+
+- Para explorar el árbol usa `rtk ls -R <path>` o `rtk tree <path>` (97–99% de ahorro) en lugar de `ls`/`find` masivos o leer muchos archivos.
+- Scopea antes de recursar: `rtk ls -R apps/frontend/src` es mejor que `rtk ls -R .`.
+
+## Lectura de archivos
+
+- `rtk read` por defecto trae el contenido completo (`--level none`). Para archivos largos usa `rtk read --level aggressive -m <N>` o `--tail-lines <N>`.
+- Lee solo los archivos relevantes; nunca hagas `cat` de un `package.json` dentro de `node_modules`.
+
+## Verificación
+
+- Cierra las sesiones de búsqueda revisando `rtk gain -p` (scope del proyecto).
+- Si un comando aparece con input enorme y `saved 0`, fue una búsqueda sin acotar: corrígela antes de continuar.
+- No ejecutes `rtk gain --reset` para "mejorar" la métrica; la métrica debe reflejar el uso real.
